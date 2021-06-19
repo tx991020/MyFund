@@ -1,0 +1,1 @@
+select * from {{.table}} where c5 ~'{{.name}}'

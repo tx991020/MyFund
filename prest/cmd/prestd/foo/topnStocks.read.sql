@@ -1,0 +1,2 @@
+select (topn(topn_add_agg(q.a), {{.count}})).*
+from ( select unnest(string_to_array(string_agg(array_to_string(c17:: text [], ','), ','), ',')) as a from (select * from {{.table}} where  {{.column}} !='--' and {{.column}}:: float > 0) t) q

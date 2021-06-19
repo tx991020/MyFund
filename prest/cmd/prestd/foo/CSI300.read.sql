@@ -1,0 +1,1 @@
+select * from {{.table}}  where c5 ~'300' and c10 != '--' and c14 =ANY('{--,0.00%}') order by c10::float desc

@@ -1,0 +1,16 @@
+# prest service
+
+[Unit]
+Description=prest service
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStart=/root/prest/prestd
+WorkingDirectory=/root/prest
+TimeoutSec=600
+Restart=on-failure
+User=root
+RuntimeDirectoryMode=775

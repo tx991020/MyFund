@@ -30,7 +30,6 @@ data/
 
 # pREST
 prest-*
-prestd
 /dist
 prest.toml
 docbuild/

@@ -1,0 +1,75 @@
+
+//最近6月
+SELECT * from {{.table}} where c13 <> '--' and c9 != '--' and c13::float < 14  order by c9::float desc limit 60
+
+//跑赢沪深300
+select a.*
+from (select *
+      from {{.table}}
+      where c11 <> '--' and c13 <> '--'  and c10 <> '--' and c7 <> '--' and c8 <> '--' and c9 <> '--') a
+         INNER join (select * from {{.table}} where c1 = '{{.fund}}') b
+                    on a.c7::float >= b.c7::float and a.c8::float >= b.c8::float and a.c9::float >= b.c9::float and a.c10::float >= b.c10::float  and a.c11::float*a.c13::float   <= b.c11::float*b.c13::float
+order by a.c7::float desc
+
+
+//比你选的更好的鸡
+select a.*
+from (select *
+      from {{.table}}
+      where c11 <> '--' and c13 <> '--' and c10 <> '--' and c7 <> '--' and c8 <> '--' and c9 <> '--') a
+         INNER join (select * from {{.table}} where c1 = '{{.fund}}') b
+                    on a.c7::float >= b.c7::float and a.c8::float >= b.c8::float and a.c9::float >= b.c9::float and a.c10::float >= b.c10::float  and a.c11::float <= b.c11::float and a.c13::float <=b.c13::float
+order by a.c10:: float desc
+
+//名字叫沪深300的鸡
+select * from {{.table}}  where c5 ~'300' and c10 != '--' and c14 =ANY('{--,0.00%}') order by c10::float desc
+
+//每日基金排行
+SELECT a.*, b.c17
+from rank{{.table}} a
+         left join fund{{.table}} b on a.c1 = b.c1 and a.c3 = '{{.date}}' and a.c4 != '--'
+order by a.c4::float desc
+
+//是否好鸡,(给以个标准比如沪深300指数怎强,看你选的鸡是否比这个强)
+select '{{.fund}}' in (
+    (select a.c1
+     from (select *
+           from {{.table}}
+           where c11 <> '--' and c13 <> '--' and c10 <> '--' and c7 <> '--' and c8 <> '--' and c9 <> '--') a
+              INNER join (select * from {{.table}} where c1 = '163402') b
+                         on a.c7::float >= b.c7::float and a.c8::float >= 5 and a.c9::float >= 8 and a.c10::float >= 10  and a.c11::float*a.c13::float   <= b.c11::float*b.c13::float
+     order by a.c10:: float desc)
+
+//收益最差的lastn只鸡的重仓股
+select (topn(topn_add_agg(q.a), {{.count}})).*
+from ( select unnest(string_to_array(string_agg(array_to_string(c17::text[], ','), ','), ',')) as a from (select * from {{.table}} where  {{.column}} !='--' and {{.column}}:: float <= 0) t) q
+
+//收益最好的鸡topn重仓股
+select (topn(topn_add_agg(q.a), {{.count}})).*
+from ( select unnest(string_to_array(string_agg(array_to_string(c17:: text [], ','), ','), ',')) as a from (select * from {{.table}} where  {{.column}} !='--' and {{.column}}:: float > 0) t) q
+
+//推荐top10
+select a.*
+from (select *
+      from {{.table}}
+      where c11 <> '--' and c13 <> '--'  and c10 <> '--' and c7 <> '--' and c8 <> '--' and c9 <> '--') a
+         INNER join (select * from {{.table}} where c1 = '{{.fund}}') b
+                    on a.c7::float >= b.c7::float and a.c8::float >= b.c8::float and a.c9::float >= b.c9::float and a.c10::float >= b.c10::float  and a.c11::float*a.c13::float   <= b.c11::float*b.c13::float
+order by a.c7::float desc limit 10;
+
+//跑的快(推荐7天免交易的近期表现好的基金)
+select * from {{.table}} where  c7 !='--' and c7::float >-2 and  (c15 = null or c15 ~'持有期限 ≥ 7天:0.00%' or c15 ~'7天 ≤ 持有期限 < 30天:0.50%' or c15 ~'7天 ≤ 持有期限 < 30天:0.10%' or c15 ~'7天 ≤ 持有期限 < 30天:0.05%' or c15 ~'7天 ≤ 持有期限 ≤ 365天:0.10%' ) and (c13='--' or c13::float <15)order by c7::float desc
+
+//近一周表现超稳的鸡
+select a.*
+from (select *
+      from {{.table}}
+      where c11 <> '--' and c13 <> '--' and c10 <> '--' and c6 <> '--' and c8 <> '--' and c9 <> '--') a
+         INNER join (select * from {{.table}} where c1 = '163402') b
+                    on a.c6::float >= b.c6::float and a.c8::float >= 5 and a.c9::float >= 8 and a.c10::float >= 10  and a.c11::float*a.c13::float   <= b.c11::float*b.c13::float
+order by a.c6:: float desc
+
+//超稳的鸡topn
+select (topn(topn_add_agg(q.p), {{.count}})).*
+from (select unnest(string_to_array(string_agg(array_to_string(c17:: text [], ','), ','), ',')) as p from ( select a.* from (select * from {{.table}} where c11 <> '--' and c13 <> '--' and c10 <> '--' and c6 <> '--' and c7 <> '--' and c8 <> '--' and c9 <>'--' ) a INNER join (select * from {{.table}} where c1='163402') b
+    on a.c7:: float >= b.c7:: float and a.c8:: float >= 5 and a.c9:: float >= 8 and a.c10:: float >= 10 and a.c11:: float *a.c13:: float <= b.c11:: float *b.c13:: float order by a.c6:: float desc) t) q

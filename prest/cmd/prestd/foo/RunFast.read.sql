@@ -1,0 +1,1 @@
+select * from {{.table}} where  c7 !='--' and c7::float >-2 and  (c15 = null or c15 ~'持有期限 ≥ 7天:0.00%' or c15 ~'7天 ≤ 持有期限 < 30天:0.50%' or c15 ~'7天 ≤ 持有期限 < 30天:0.10%' or c15 ~'7天 ≤ 持有期限 < 30天:0.05%' or c15 ~'7天 ≤ 持有期限 ≤ 365天:0.10%' ) and (c13='--' or c13::float <15)order by c7::float desc
