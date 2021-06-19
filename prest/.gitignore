@@ -33,5 +33,4 @@ prest-*
 prestd
 /dist
 prest.toml
-/cmd/prestd/prestd
 docbuild/
