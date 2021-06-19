@@ -1,0 +1,31 @@
+
+
+from pyspider.libs.base_handler import *
+import requests
+
+class Handler(BaseHandler):
+    crawl_config = {
+    }
+
+    @every(minutes=12 * 60)
+    def on_start(self):
+        self.crawl('https://www.howbuy.com/fund/012414/', fetch_type='js', js_script=''' function() { window.scrollTo(0,document.body.scrollHeight);''',  callback=self.index_page)
+
+
+    @config(age=10 * 12 * 60 * 60)
+    def index_page(self, response):
+        rate = ''
+        date = response.doc('.tips_icon_con').text()
+        if len(response.doc('.con_ratio_red').text()) > 0:
+            rate = response.doc('.con_ratio_red').text()
+        else:
+            rate = response.doc('.con_ratio_green').text()
+
+        #data = {"date":date,"rate":rate}
+        data = {
+              'chat_id': '1857532929',
+               'text': '招商中证白酒C date:{},rate:{}'.format(date,rate)
+        }
+        print(data)
+        res = requests.post('https://api.telegram.org/bot1897710207:AAEGoj5XfeR8plG5Nbt17njIe2mNV4dHjdY/sendMessage',data=data)
+        print(res.text)
